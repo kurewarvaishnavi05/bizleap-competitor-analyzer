@@ -15,7 +15,7 @@ export default function SettingsPage() {
 
       <div className="grid md:grid-cols-[250px_1fr] gap-8">
         <aside className="space-y-2">
-          <Button variant="secondary" className="w-full justify-start">
+          <Button variant="outline" className="w-full justify-start">
             <User className="mr-2 h-4 w-4" /> Profile
           </Button>
           <Button variant="ghost" className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted/50">

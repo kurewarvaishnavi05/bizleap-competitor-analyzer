@@ -80,7 +80,7 @@ export const Visualizations: React.FC<VisualizationsProps> = ({ recommendations 
               <Tooltip 
                 cursor={{ fill: '#374151', opacity: 0.4 }}
                 contentStyle={{ backgroundColor: '#111827', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }}
-                formatter={(value: number) => [`${value}%`, 'Growth Potential']}
+                formatter={(value: any) => [`${value}%`, 'Growth Potential']}
                 labelFormatter={(label, payload) => {
                   if (payload && payload.length > 0) {
                     return payload[0].payload.fullTitle;
