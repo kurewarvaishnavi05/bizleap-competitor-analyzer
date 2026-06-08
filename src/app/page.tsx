@@ -36,9 +36,11 @@ export default function Home() {
                 Start Analysis <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="h-12 px-8 text-base glass hover:bg-white/5">
-              View Demo
-            </Button>
+            <Link href="/recommendations">
+              <Button size="lg" variant="outline" className="h-12 px-8 text-base glass hover:bg-white/5 border-indigo-500/50 text-indigo-400">
+                AI Recommendations <Zap className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
           </div>
 
           {/* Competitor Input Section Replaced by Analysis Module */}
