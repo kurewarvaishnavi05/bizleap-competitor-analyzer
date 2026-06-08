@@ -1,56 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { BarChart3, Search, ChevronRight, CheckCircle2, Shield, Zap, Loader2 } from "lucide-react";
+import { ChevronRight, CheckCircle2, Shield, Zap } from "lucide-react";
 import { Header } from "@/components/Header";
 
 export default function Home() {
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [urls, setUrls] = useState({
-    company1: "",
-    company2: "",
-    company3: "",
-    company4: "",
-    company5: "",
-  });
-
-  const handleRunAnalysis = async () => {
-    const activeUrls = [urls.company1, urls.company2, urls.company3, urls.company4, urls.company5].filter(Boolean);
-    
-    if (activeUrls.length < 2) {
-      alert("Please enter at least 2 URLs (Your Company and Main Competitor).");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ urls: activeUrls }),
-      });
-      const data = await res.json();
-      
-      if (data.success) {
-        // Save the AI response to sessionStorage so the dashboard can pick it up
-        sessionStorage.setItem('aiAnalysisData', JSON.stringify(data.data));
-        router.push("/dashboard");
-      } else {
-        alert(data.error || "An error occurred during analysis.");
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Failed to connect to the analysis engine.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className="flex min-h-screen flex-col bg-background selection:bg-primary/30">
       <Header />
@@ -76,95 +31,32 @@ export default function Home() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 mb-16">
-            <Button size="lg" className="h-12 px-8 text-base bg-white text-black hover:bg-white/90">
-              Start Analysis <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
+            <Link href="/analysis">
+              <Button size="lg" className="h-12 px-8 text-base bg-white text-black hover:bg-white/90">
+                Start Analysis <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
             <Button size="lg" variant="outline" className="h-12 px-8 text-base glass hover:bg-white/5">
               View Demo
             </Button>
           </div>
 
-          {/* Competitor Input Section */}
+          {/* Competitor Input Section Replaced by Analysis Module */}
           <div className="w-full max-w-4xl p-1 rounded-2xl bg-gradient-to-b from-white/10 to-transparent border border-white/10 shadow-2xl">
-            <div className="bg-card/50 backdrop-blur-xl rounded-xl p-6 md:p-8 border border-white/5">
-              <div className="flex flex-col gap-2 mb-6 text-left">
-                <h2 className="text-2xl font-semibold">Run Competitive Analysis</h2>
-                <p className="text-muted-foreground text-sm">Enter up to 5 competitor websites to generate a comprehensive AI report.</p>
+            <div className="bg-card/50 backdrop-blur-xl rounded-xl p-12 md:p-16 border border-white/5 text-center space-y-6">
+              <h2 className="text-3xl font-semibold">Ready to dominate your market?</h2>
+              <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+                Generate a comprehensive AI report with deep insights into your competitors, pricing strategies, market gaps, and execution plans.
+              </p>
+              <div className="pt-4">
+                <Link href="/analysis">
+                  <Button 
+                    className="h-14 px-10 text-lg font-semibold shadow-[0_0_20px_-3px_rgba(79,70,229,0.5)] hover:shadow-[0_0_25px_-3px_rgba(79,70,229,0.7)] transition-shadow"
+                  >
+                    Go to Analysis Module <ChevronRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
               </div>
-              
-              <div className="grid gap-4 md:grid-cols-2 mb-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Company 1 (Your Company)</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="https://yourcompany.com" 
-                      className="pl-9 bg-background/50 border-white/10 focus-visible:ring-primary h-11"
-                      value={urls.company1}
-                      onChange={(e) => setUrls({...urls, company1: e.target.value})}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Company 2 (Main Competitor)</label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      placeholder="https://competitor.com" 
-                      className="pl-9 bg-background/50 border-white/10 focus-visible:ring-primary h-11"
-                      value={urls.company2}
-                      onChange={(e) => setUrls({...urls, company2: e.target.value})}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 mb-6">
-                <div className="h-[1px] flex-1 bg-border/50"></div>
-                <span className="text-xs text-muted-foreground uppercase font-medium tracking-wider">Optional Competitors</span>
-                <div className="h-[1px] flex-1 bg-border/50"></div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-3 mb-8">
-                <div className="relative">
-                  <Input 
-                    placeholder="Company 3 URL (Optional)" 
-                    className="bg-background/30 border-white/5 text-sm h-10"
-                    value={urls.company3}
-                    onChange={(e) => setUrls({...urls, company3: e.target.value})}
-                  />
-                </div>
-                <div className="relative">
-                  <Input 
-                    placeholder="Company 4 URL (Optional)" 
-                    className="bg-background/30 border-white/5 text-sm h-10"
-                    value={urls.company4}
-                    onChange={(e) => setUrls({...urls, company4: e.target.value})}
-                  />
-                </div>
-                <div className="relative">
-                  <Input 
-                    placeholder="Company 5 URL (Optional)" 
-                    className="bg-background/30 border-white/5 text-sm h-10"
-                    value={urls.company5}
-                    onChange={(e) => setUrls({...urls, company5: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <Button 
-                onClick={handleRunAnalysis}
-                disabled={isLoading}
-                className="w-full h-12 text-base font-semibold shadow-[0_0_20px_-3px_rgba(79,70,229,0.5)] hover:shadow-[0_0_25px_-3px_rgba(79,70,229,0.7)] transition-shadow"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Analyzing Competitors...
-                  </>
-                ) : (
-                  "Run AI Analysis"
-                )}
-              </Button>
             </div>
           </div>
           
