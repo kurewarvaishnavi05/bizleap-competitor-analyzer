@@ -1,10 +1,10 @@
 import { create } from 'zustand';
-import { AnalysisInput, AnalysisResults, ExecutionPlan, generateMockAnalysis } from '@/lib/mockAiService';
+import { AnalysisInput, AnalysisResults, generateMockAnalysis } from '@/lib/mockAiService';
 
 interface AppState {
   analysisInput: AnalysisInput | null;
   analysisResults: AnalysisResults | null;
-  executionPlan: ExecutionPlan | null;
+  executionPlan: any | null;
   isAnalyzing: boolean;
   analysisStep: string;
   setAnalysisInput: (input: AnalysisInput) => void;
@@ -33,14 +33,14 @@ export const useAppStore = create<AppState>((set) => ({
     set({ analysisStep: 'Analyzing competitors...' });
     
     // Step 2: Simulate deep analysis (using our mock service which takes time)
-    const { results, plan } = await generateMockAnalysis(input);
+    const { results } = await generateMockAnalysis(input);
     
     set({ analysisStep: 'Generating execution plan...' });
     await new Promise((resolve) => setTimeout(resolve, 800));
     
     set({ 
       analysisResults: results,
-      executionPlan: plan,
+      executionPlan: null,
       isAnalyzing: false,
       analysisStep: 'Complete'
     });
