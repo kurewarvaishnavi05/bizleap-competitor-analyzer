@@ -26,6 +26,8 @@ Their main competitors are: ${input.competitors.join(", ")}.
 Your task is to generate a comprehensive, data-driven analysis with real facts, actual product names, real features, known pricing (if public), and recent news.
 Do NOT use generic placeholders like "Competitor A" or "Feature X". Use real names, real features, and real market positioning.
 
+CRITICAL INSTRUCTION: Keep all text fields extremely concise (maximum 1-2 short sentences per string). If you write too much, the system will crash. Focus on raw data and bullet-point brevity.
+
 OUTPUT FORMAT REQUIREMENTS:
 You MUST return ONLY valid JSON matching the exact schema below. Do not include markdown code blocks or any other text before or after the JSON.
 
