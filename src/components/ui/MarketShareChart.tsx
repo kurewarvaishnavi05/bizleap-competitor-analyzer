@@ -100,7 +100,7 @@ export function MarketShareChart({ data, myCompanyName }: MarketShareChartProps)
               <Tooltip 
                 contentStyle={{ backgroundColor: 'rgba(10,10,10,0.95)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}
                 itemStyle={{ color: '#fff', fontWeight: 'bold' }}
-                formatter={(value: number) => [`${value}%`, 'Market Share']}
+                formatter={(value: any) => [`${value}%`, 'Market Share']}
               />
               <Pie
                 data={combinedData}

@@ -40,7 +40,7 @@ export function TrendChart({ data, xAxisKey, lines, isForecast = false }: TrendC
           <Tooltip 
             contentStyle={{ backgroundColor: 'rgba(10,10,10,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px' }}
             itemStyle={{ color: '#fff' }}
-            formatter={(value: number) => isForecast ? [`$${(value/1000000).toFixed(1)}M`, "Revenue"] : [value, "Metric"]}
+            formatter={(value: any) => isForecast ? [`$${(value/1000000).toFixed(1)}M`, "Revenue"] : [value, "Metric"]}
           />
           <Legend verticalAlign="top" height={36} />
           

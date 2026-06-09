@@ -250,7 +250,7 @@ export const generateMockAnalysis = async (input: AnalysisInput): Promise<{ resu
       let explanation = "";
       let reasoning = "";
       let expectedImpact = "";
-      let actionPlan = [];
+      let actionPlan: string[] = [];
 
       if (category === "product") {
         const features = ["Advanced API Integrations", "AI Analytics Module", "Mobile Application", "Custom Reporting Engine", "Enterprise SSO"];
