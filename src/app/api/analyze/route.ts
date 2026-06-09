@@ -56,8 +56,7 @@ Ensure that 'comparisonData.features' and 'comparisonData.pricing' use the actua
       model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
-        temperature: 0.2,
-        tools: [{ googleSearch: {} }]
+        temperature: 0.2
       }
     });
 
