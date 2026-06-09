@@ -1,126 +1,79 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { AnalysisInput } from '@/types/analysis';
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { urls } = body;
+    const input: AnalysisInput = await req.json();
+    const apiKey = process.env.GEMINI_API_KEY;
 
-    if (!urls || !Array.isArray(urls) || urls.length < 2) {
-      return NextResponse.json(
-        { error: 'Please provide at least 2 URLs for comparison.' },
-        { status: 400 }
-      );
+    if (!apiKey) {
+      return NextResponse.json({ error: 'GEMINI_API_KEY is not set in environment variables.' }, { status: 500 });
     }
 
-    let analysisData;
-    let usedMockData = false;
+    const ai = new GoogleGenAI({ apiKey });
 
-    // Check if the API key is present
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "your_api_key_here") {
-      console.warn("No valid GEMINI_API_KEY found. Falling back to mock data for demonstration.");
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate delay
-      analysisData = getMockData(urls);
-      usedMockData = true;
-    } else {
-      try {
-        const ai = new GoogleGenAI({});
-        const prompt = `
-          Perform a comprehensive competitor analysis for the following companies based on their URLs:
-          ${urls.join(", ")}
-          
-          Return a JSON response containing the following structure:
-          {
-            "executiveSummary": "A 2-paragraph summary comparing these companies, identifying the leader, and pointing out market gaps.",
-            "strengths": ["...", "...", "..."],
-            "weaknesses": ["...", "...", "..."],
-            "opportunities": ["...", "...", "..."],
-            "threats": ["...", "...", "..."],
-            "marketPositionScore": 85,
-            "recommendations": [
-              {"category": "Product", "action": "..."},
-              {"category": "Marketing", "action": "..."}
-            ]
-          }
-          Only return valid JSON without markdown blocks.
-        `;
+    // Construct the prompt to demand the specific JSON schema
+    const prompt = `You are an expert competitive intelligence analyst and management consultant.
+You must perform a deep competitive analysis for the company: "${input.companyName}" (${input.companyWebsite}).
+Their industry is: "${input.industry}".
+Their target market is: "${input.targetMarket}".
+Their main competitors are: ${input.competitors.join(", ")}.
 
-        const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: prompt,
-          config: {
-            responseMimeType: "application/json",
-          }
-        });
+Your task is to generate a comprehensive, data-driven analysis with real facts, actual product names, real features, known pricing (if public), and recent news.
+Do NOT use generic placeholders like "Competitor A" or "Feature X". Use real names, real features, and real market positioning.
 
-        const text = response.text || "{}";
-        analysisData = JSON.parse(text);
-      } catch (aiError) {
-        console.error("AI Generation Error, falling back to mock data:", aiError);
-        analysisData = getMockData(urls);
-        usedMockData = true;
-      }
-    }
+OUTPUT FORMAT REQUIREMENTS:
+You MUST return ONLY valid JSON matching the exact schema below. Do not include markdown code blocks or any other text before or after the JSON.
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        analysisId: `analysis_${Math.random().toString(36).substring(7)}`,
-        urlsAnalyzed: urls,
-        analysis: analysisData,
-        usedMockData: usedMockData,
-        timestamp: new Date().toISOString()
+{
+  "overview": { "summary": "string", "businessModel": "string", "targetAudience": "string" },
+  "executiveSummary": { "marketPosition": "string", "keyStrengths": ["string"], "keyWeaknesses": ["string"], "biggestOpportunities": ["string"], "majorThreats": ["string"], "recommendedNextActions": ["string"], "marketSizeEstimate": "string", "marketSaturationIndex": 0-100, "aiConfidenceScore": 0-100 },
+  "healthScores": { "overall": 0-100, "competitive": 0-100, "innovation": 0-100, "seo": 0-100, "marketing": 0-100, "customerExperience": 0-100, "revenueGrowthPotential": 0-100, "risk": 0-100, "explanations": { "overall": "string", "competitive": "string" } },
+  "marketShare": { "myCompany": { "share": 0-100, "trend": "up" | "down" | "flat" }, "competitors": [ { "name": "string", "share": 0-100, "trend": "up"| "down"| "flat" } ], "others": 0-100, "explanation": "string", "insights": "string", "confidence": "High" | "Medium" | "Low" },
+  "positioning": { "myCompany": { "presence": 0-100, "innovation": 0-100 }, "competitors": [ { "name": "string", "presence": 0-100, "innovation": 0-100 } ], "quadrantInsights": { "leaders": "string", "challengers": "string", "visionaries": "string", "nichePlayers": "string" } },
+  "swot": { "strengths": [ {"text": "string", "impactScore": 0-100, "priority": "High"} ], "weaknesses": [], "opportunities": [], "threats": [], "aiConfidence": 0-100 },
+  "trends": { "historical": [ {"month": "string", "industry": 0-100, "myCompany": 0-100, "competitorAvg": 0-100} ], "forecast": [ {"year": "string", "projectedRevenue": 0-100, "industryAverage": 0-100} ] },
+  "battleCards": [ { "name": "string", "overview": "string", "strengths": ["string"], "weaknesses": ["string"], "pricing": "string", "keyCustomers": ["string"], "techStack": ["string"], "marketPosition": "string", "winLossStrategy": { "howToWin": ["string"], "whyWeLose": ["string"] } } ],
+  "liveFeed": [ { "id": "string", "competitor": "string", "type": "News", "content": "string", "date": "string", "impact": "High" } ],
+  "multiPerspective": { "ceo": { "insights": ["string"], "risks": ["string"], "opportunities": ["string"] }, "marketing": { "insights": [], "risks": [], "opportunities": [] }, "sales": { "insights": [], "risks": [], "opportunities": [] }, "customer": { "insights": [], "risks": [], "opportunities": [] }, "investor": { "insights": [], "risks": [], "opportunities": [] } },
+  "comparisonData": { "features": [ { "category": "string", "myCompany": true, "c1": "string" } ], "radarMetrics": [ { "metric": "string", "myCompany": 0-100, "c1": 0-100 } ], "pricing": [ { "tier": "string", "myCompany": "string", "c1": "string" } ] },
+  "marketGaps": { "missingFeatures": ["string"], "untappedSegments": ["string"], "pricingOpportunities": ["string"], "industryTrends": ["string"], "competitorWeaknesses": ["string"] },
+  "dynamicRecommendations": { "product": [ { "title": "string", "explanation": "string", "reasoning": "string", "expectedImpact": "string", "implementationDifficulty": "High", "estimatedROI": "string", "priorityLevel": "High", "actionPlan": ["string"] } ], "marketing": [], "seo": [], "sales": [], "customerExperience": [], "revenue": [] }
+}
+
+Ensure that EVERY FIELD in the schema is provided, especially 'battleCards', 'swot', 'comparisonData', and 'dynamicRecommendations'. 
+Ensure that 'comparisonData.features' and 'comparisonData.pricing' use the actual names of the competitors as keys (e.g., "${input.competitors[0] || 'competitor1'}": true).
+`;
+
+    // Try generating content
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-pro',
+      contents: prompt,
+      config: {
+        temperature: 0.2,
+        responseMimeType: "application/json",
+        tools: [{ googleSearch: {} }]
       }
     });
 
-  } catch (error) {
-    console.error("API Error:", error);
-    return NextResponse.json(
-      { error: 'Internal Server Error.' },
-      { status: 500 }
-    );
-  }
-}
+    const jsonText = response.text;
+    if (!jsonText) {
+      throw new Error("No text returned from Gemini API");
+    }
 
-// Helper to return structured mock data so the dashboard always works
-function getMockData(urls: string[]) {
-  const company1 = urls[0].replace("https://", "").split(".")[0];
-  const company2 = urls[1].replace("https://", "").split(".")[0];
-  
-  return {
-    executiveSummary: `Based on our simulated analysis, **${company1}** is currently positioned as a strong challenger against **${company2}**. While ${company2} holds a larger overall market share, ${company1} leads in innovation and feature velocity. There is a clear market gap in the mid-tier pricing segment that ${company1} can exploit to accelerate growth.`,
-    strengths: [
-      "Intuitive, modern user interface",
-      "Robust AI capabilities integrated natively",
-      "Competitive pricing for entry-level tier"
-    ],
-    weaknesses: [
-      "Limited integrations with legacy CRM systems",
-      "Brand recognition is lower than top competitor"
-    ],
-    opportunities: [
-      "Expansion into European markets",
-      "Partnership with digital marketing agencies",
-      "Launch of enterprise-specific features"
-    ],
-    threats: [
-      `${company2} releasing a similar feature set`,
-      "Economic downturn affecting software budgets"
-    ],
-    marketPositionScore: 82,
-    recommendations: [
-      {
-        category: "Product Strategy",
-        action: `Develop native CRM integrations to close the enterprise gap with ${company2}.`
-      },
-      {
-        category: "Marketing & SEO",
-        action: "Double down on specialized long-tail keywords where you currently have a slight lead."
-      },
-      {
-        category: "Pricing Strategy",
-        action: `Introduce a mid-tier plan to capture users churning from ${company2}'s high price jumps.`
-      }
-    ]
-  };
+    let parsedResult;
+    try {
+      parsedResult = JSON.parse(jsonText);
+    } catch (e) {
+      console.error("Failed to parse JSON from Gemini:", jsonText);
+      throw new Error("Gemini returned invalid JSON");
+    }
+
+    return NextResponse.json({ results: parsedResult });
+
+  } catch (error: any) {
+    console.error("API Analyze Error:", error);
+    return NextResponse.json({ error: error.message || 'Failed to generate analysis' }, { status: 500 });
+  }
 }

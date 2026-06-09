@@ -1,4 +1,4 @@
-import { AnalysisResults, AnalysisInput } from "./mockAiService";
+import { AnalysisResults, AnalysisInput } from "@/types/analysis";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";

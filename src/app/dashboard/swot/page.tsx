@@ -4,7 +4,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { AnimatedCard } from "@/components/ui/AnimatedCard";
 import { BarChart3, ArrowUpRight, ArrowDownRight, Zap, ShieldAlert, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SWOTItem } from "@/lib/mockAiService";
+import { SWOTItem } from "@/types/analysis";
 
 export default function SWOTPage() {
   const { analysisResults } = useAppStore();

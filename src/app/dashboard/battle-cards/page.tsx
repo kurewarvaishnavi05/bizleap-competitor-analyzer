@@ -3,7 +3,7 @@
 import { useAppStore } from "@/store/useAppStore";
 import { AnimatedCard } from "@/components/ui/AnimatedCard";
 import { Swords, CheckCircle2, XCircle, DollarSign, Users, Code, Crosshair } from "lucide-react";
-import { BattleCard } from "@/lib/mockAiService";
+import { BattleCard } from "@/types/analysis";
 
 export default function BattleCardsPage() {
   const { analysisResults } = useAppStore();

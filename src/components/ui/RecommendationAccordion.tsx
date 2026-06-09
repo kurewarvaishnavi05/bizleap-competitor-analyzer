@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ArrowRight, Zap, Target, TrendingUp, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Recommendation } from "@/lib/mockAiService";
+import { Recommendation } from "@/types/analysis";
 
 export function RecommendationAccordion({ recommendation, index }: { recommendation: Recommendation; index: number }) {
   const [isOpen, setIsOpen] = useState(false);

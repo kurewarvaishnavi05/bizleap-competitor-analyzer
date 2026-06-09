@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { AnalysisInput, AnalysisResults, generateMockAnalysis } from '@/lib/mockAiService';
+import { AnalysisInput, AnalysisResults } from '@/types/analysis';
 
 interface AppState {
   analysisInput: AnalysisInput | null;
@@ -28,15 +28,22 @@ export const useAppStore = create<AppState>((set) => ({
       analysisInput: input 
     });
     
-    // Step 1: Simulate gathering data
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    set({ analysisStep: 'Analyzing competitors...' });
+    // Step 2: Call the real Gemini API
+    const response = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(input)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to generate analysis');
+    }
+
+    const { results } = await response.json();
     
-    // Step 2: Simulate deep analysis (using our mock service which takes time)
-    const { results } = await generateMockAnalysis(input);
-    
-    set({ analysisStep: 'Generating execution plan...' });
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    set({ analysisStep: 'Formatting execution plan...' });
+    await new Promise((resolve) => setTimeout(resolve, 500));
     
     set({ 
       analysisResults: results,
