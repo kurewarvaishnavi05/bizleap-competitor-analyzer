@@ -37,11 +37,36 @@ export const useAppStore = create<AppState>((set) => ({
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to generate analysis. The API might have timed out.');
+        const textError = await response.text().catch(() => '');
+        throw new Error(textError || 'Failed to generate analysis. The API might have timed out.');
       }
 
-      const { results } = await response.json();
+      set({ analysisStep: 'Analyzing live market data (this might take 10-20 seconds)...' });
+
+      // Read the stream
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("Failed to read stream from server.");
+      
+      const decoder = new TextDecoder();
+      let fullText = '';
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        fullText += decoder.decode(value, { stream: true });
+      }
+      
+      set({ analysisStep: 'Formatting execution plan...' });
+      
+      // Strip markdown JSON blocks if the AI includes them
+      fullText = fullText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+      
+      let results;
+      try {
+        results = JSON.parse(fullText);
+      } catch (e) {
+        throw new Error("Received malformed data from AI. Please try again.");
+      }
       
       set({ analysisStep: 'Formatting execution plan...' });
       await new Promise((resolve) => setTimeout(resolve, 500));

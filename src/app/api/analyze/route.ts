@@ -50,8 +50,8 @@ Ensure that EVERY FIELD in the schema is provided, especially 'battleCards', 'sw
 Ensure that 'comparisonData.features' and 'comparisonData.pricing' use the actual names of the competitors as keys (e.g., "${input.competitors[0] || 'competitor1'}": true).
 `;
 
-    // Try generating content
-    const response = await ai.models.generateContent({
+    // Try generating content stream
+    const stream = await ai.models.generateContentStream({
       model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
@@ -60,23 +60,24 @@ Ensure that 'comparisonData.features' and 'comparisonData.pricing' use the actua
       }
     });
 
-    let jsonText = response.text;
-    if (!jsonText) {
-      throw new Error("No text returned from Gemini API");
-    }
+    const readable = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of stream) {
+            if (chunk.text) {
+              controller.enqueue(new TextEncoder().encode(chunk.text));
+            }
+          }
+          controller.close();
+        } catch (err) {
+          controller.error(err);
+        }
+      }
+    });
 
-    // Strip markdown JSON blocks if the AI includes them
-    jsonText = jsonText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
-
-    let parsedResult;
-    try {
-      parsedResult = JSON.parse(jsonText);
-    } catch (e) {
-      console.error("Failed to parse JSON from Gemini:", jsonText);
-      throw new Error("Gemini returned invalid JSON");
-    }
-
-    return NextResponse.json({ results: parsedResult });
+    return new Response(readable, {
+      headers: { 'Content-Type': 'text/plain' }
+    });
 
   } catch (error: any) {
     console.error("API Analyze Error:", error);
