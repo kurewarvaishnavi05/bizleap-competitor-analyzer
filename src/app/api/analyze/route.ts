@@ -55,15 +55,17 @@ Ensure that 'comparisonData.features' and 'comparisonData.pricing' use the actua
       contents: prompt,
       config: {
         temperature: 0.2,
-        responseMimeType: "application/json",
         tools: [{ googleSearch: {} }]
       }
     });
 
-    const jsonText = response.text;
+    let jsonText = response.text;
     if (!jsonText) {
       throw new Error("No text returned from Gemini API");
     }
+
+    // Strip markdown JSON blocks if the AI includes them
+    jsonText = jsonText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
 
     let parsedResult;
     try {
