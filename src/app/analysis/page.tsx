@@ -16,7 +16,7 @@ export default function AnalysisPage() {
   const [companyWebsite, setCompanyWebsite] = useState("");
   const [industry, setIndustry] = useState("");
   const [targetMarket, setTargetMarket] = useState("");
-  const [competitors, setCompetitors] = useState<string[]>([""]);
+  const [competitors, setCompetitors] = useState<{id: number, value: string}[]>([{ id: Date.now(), value: "" }]);
 
   useEffect(() => {
     // If analysis is complete and we have results, redirect to dashboard
@@ -27,7 +27,7 @@ export default function AnalysisPage() {
 
   const handleAddCompetitor = () => {
     if (competitors.length < 5) {
-      setCompetitors([...competitors, ""]);
+      setCompetitors([...competitors, { id: Date.now(), value: "" }]);
     }
   };
 
@@ -39,13 +39,13 @@ export default function AnalysisPage() {
 
   const handleCompetitorChange = (index: number, value: string) => {
     const newCompetitors = [...competitors];
-    newCompetitors[index] = value;
+    newCompetitors[index].value = value;
     setCompetitors(newCompetitors);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const validCompetitors = competitors.filter(c => c.trim() !== "");
+    const validCompetitors = competitors.filter(c => c.value.trim() !== "").map(c => c.value);
     
     if (!companyName || !industry || validCompetitors.length === 0) {
       alert("Please fill in the required fields and at least one competitor.");
@@ -136,11 +136,11 @@ export default function AnalysisPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {competitors.map((comp, index) => (
-              <div key={index} className="flex items-center gap-2">
+              <div key={comp.id} className="flex items-center gap-2">
                 <Input 
                   type="url" 
                   placeholder={`https://competitor${index + 1}.com`}
-                  value={comp}
+                  value={comp.value}
                   onChange={e => handleCompetitorChange(index, e.target.value)}
                   required={index === 0}
                 />
