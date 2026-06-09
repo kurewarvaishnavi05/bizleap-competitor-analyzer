@@ -28,29 +28,38 @@ export const useAppStore = create<AppState>((set) => ({
       analysisInput: input 
     });
     
-    // Step 2: Call the real Gemini API
-    const response = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input)
-    });
+    try {
+      // Step 2: Call the real Gemini API
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input)
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to generate analysis');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate analysis. The API might have timed out.');
+      }
+
+      const { results } = await response.json();
+      
+      set({ analysisStep: 'Formatting execution plan...' });
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      
+      set({ 
+        analysisResults: results,
+        executionPlan: null,
+        isAnalyzing: false,
+        analysisStep: 'Complete'
+      });
+    } catch (error: any) {
+      console.error(error);
+      set({ 
+        isAnalyzing: false, 
+        analysisStep: 'Error: ' + error.message 
+      });
+      alert('Analysis failed: ' + error.message);
     }
-
-    const { results } = await response.json();
-    
-    set({ analysisStep: 'Formatting execution plan...' });
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    
-    set({ 
-      analysisResults: results,
-      executionPlan: null,
-      isAnalyzing: false,
-      analysisStep: 'Complete'
-    });
   },
 
   resetStore: () => set({
