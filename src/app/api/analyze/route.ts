@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { AnalysisInput } from '@/types/analysis';
 
-export const runtime = 'edge'; // Use Edge runtime to bypass 10s serverless timeout
 export const maxDuration = 60; // Allow up to 60 seconds
 export const dynamic = 'force-dynamic';
 
