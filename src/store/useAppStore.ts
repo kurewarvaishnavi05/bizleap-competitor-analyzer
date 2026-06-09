@@ -65,15 +65,24 @@ export const useAppStore = create<AppState>((set) => ({
         set({ analysisStep: 'Formatting execution plan...' });
         
         // Strip markdown JSON blocks if the AI includes them
-        fullText = fullText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
+        let cleanText = fullText.replace(/```json/gi, '').replace(/```/g, '').trim();
+        
+        // Extract just the JSON object from the first { to the last }
+        const firstBrace = cleanText.indexOf('{');
+        const lastBrace = cleanText.lastIndexOf('}');
+        
+        if (firstBrace !== -1 && lastBrace !== -1) {
+          cleanText = cleanText.substring(firstBrace, lastBrace + 1);
+        }
         
         let results;
         try {
-          results = JSON.parse(fullText);
+          results = JSON.parse(cleanText);
         } catch (e) {
           if (fullText.includes('503') || fullText.includes('high demand')) {
             throw new Error('Google servers are currently overloaded (503).');
           }
+          console.error("Malformed AI Data:", fullText);
           throw new Error("Received malformed data from AI. Please try again.");
         }
         
