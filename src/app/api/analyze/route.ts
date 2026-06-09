@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
 import { AnalysisInput } from '@/types/analysis';
 
+export const maxDuration = 60; // Allow up to 60 seconds for Gemini API
+
 export async function POST(req: Request) {
   try {
     const input: AnalysisInput = await req.json();
