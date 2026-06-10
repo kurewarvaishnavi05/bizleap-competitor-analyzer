@@ -28,7 +28,7 @@ export const useAppStore = create<AppState>((set) => ({
       analysisInput: input 
     });
     
-    let retries = 3;
+    let retries = 5;
     let delay = 3000; // start with 3 seconds
 
     while (retries > 0) {
@@ -99,7 +99,8 @@ export const useAppStore = create<AppState>((set) => ({
         return; // Success, exit the retry loop
 
       } catch (error: any) {
-        if (error.message.includes('503') && retries > 1) {
+        const isRetriable = error.message.includes('503') || error.message.includes('network error') || error.message.includes('overloaded');
+        if (isRetriable && retries > 1) {
           retries--;
           set({ analysisStep: `Google servers are busy. Retrying automatically in ${delay/1000}s... (${retries} attempts left)` });
           await new Promise((resolve) => setTimeout(resolve, delay));

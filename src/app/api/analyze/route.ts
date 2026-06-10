@@ -23,10 +23,12 @@ Their industry is: "${input.industry}".
 Their target market is: "${input.targetMarket}".
 Their main competitors are: ${input.competitors.join(", ")}.
 
-Your task is to generate a comprehensive, data-driven analysis with real facts, actual product names, real features, known pricing (if public), and recent news.
+CRITICAL SEARCH INSTRUCTION: You MUST use the Google Search tool to browse the internet for live, real-time data about the company and its competitors. Find their actual current pricing, newly released features, and recent news articles. DO NOT rely solely on your internal knowledge. 
+Your task is to generate a comprehensive, data-driven analysis with real facts, actual product names, real features, known pricing (if public), and recent news found via Google Search.
 Do NOT use generic placeholders like "Competitor A" or "Feature X". Use real names, real features, and real market positioning.
 
 CRITICAL INSTRUCTION: Keep all text fields extremely concise (maximum 1-2 short sentences per string). If you write too much, the system will crash. Focus on raw data and bullet-point brevity.
+CRITICAL FORMATTING INSTRUCTION: You MUST output ONLY valid JSON. You MUST NOT output any conversational text, markdown blocks, or search grounding citations. DO NOT append source links at the end. Your entire response must start with { and end with }.
 
 OUTPUT FORMAT REQUIREMENTS:
 You MUST return ONLY valid JSON matching the exact schema below. Do not include markdown code blocks or any other text before or after the JSON.
@@ -56,7 +58,8 @@ Ensure that 'comparisonData.features' and 'comparisonData.pricing' use the actua
       model: 'gemini-2.5-flash',
       contents: prompt,
       config: {
-        temperature: 0.2
+        temperature: 0.2,
+        tools: [{ googleSearch: {} }]
       }
     });
 
