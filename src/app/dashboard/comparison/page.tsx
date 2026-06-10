@@ -11,7 +11,7 @@ export default function ComparisonPage() {
   if (!analysisResults || !analysisInput) return <div>No analysis found.</div>;
 
   const { comparisonData } = analysisResults;
-  const competitors = analysisInput.competitors.map((c, i) => `Competitor ${i + 1}`);
+  const competitors = analysisInput.competitors;
 
   return (
     <div className="space-y-8 pb-12">
@@ -41,7 +41,7 @@ export default function ComparisonPage() {
                 <th className="p-3 font-medium text-muted-foreground">Feature</th>
                 <th className="p-3 font-semibold text-brand-400">{analysisInput.companyName}</th>
                 {competitors.map(c => (
-                  <th key={c} className="p-3 font-medium text-muted-foreground">{c}</th>
+                  <th key={c} className="p-3 font-semibold text-muted-foreground">{c}</th>
                 ))}
               </tr>
             </thead>
@@ -60,17 +60,18 @@ export default function ComparisonPage() {
                   </td>
 
                   {/* Competitors */}
-                  {competitors.map((_, i) => {
-                    const compKey = `competitor${i + 1}`;
-                    const val = feature[compKey];
+                  {competitors.map((compName, i) => {
+                    const val = feature[compName] ?? feature[`c${i + 1}`] ?? feature[`competitor${i + 1}`];
                     return (
                       <td key={i} className="p-3">
                         {typeof val === 'boolean' ? (
                           val ? <Check className="w-5 h-5 text-green-500/70" /> : <X className="w-5 h-5 text-red-500/70" />
                         ) : val === 'Partial' ? (
                           <Minus className="w-5 h-5 text-yellow-500/70" />
-                        ) : (
+                        ) : val !== undefined ? (
                           <span className="text-sm text-muted-foreground">{val}</span>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">-</span>
                         )}
                       </td>
                     );

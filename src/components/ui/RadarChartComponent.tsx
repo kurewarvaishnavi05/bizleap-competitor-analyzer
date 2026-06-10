@@ -48,7 +48,7 @@ export function RadarChartComponent({
               <Radar
                 key={comp}
                 name={comp}
-                dataKey={`competitor${idx + 1}`}
+                dataKey={(dataPoint) => dataPoint[comp] ?? dataPoint[`competitor${idx + 1}`] ?? dataPoint[`c${idx + 1}`]}
                 stroke={colors[(idx + 1) % colors.length]}
                 fill={colors[(idx + 1) % colors.length]}
                 fillOpacity={0.2}
