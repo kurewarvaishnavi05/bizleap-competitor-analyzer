@@ -62,6 +62,10 @@ export const useAppStore = create<AppState>((set) => ({
           fullText += decoder.decode(value, { stream: true });
         }
         
+        if (fullText.trim().length === 0) {
+          throw new Error('Google servers returned an empty stream (503). Retrying...');
+        }
+        
         set({ analysisStep: 'Formatting execution plan...' });
         
         // Strip markdown JSON blocks if the AI includes them
