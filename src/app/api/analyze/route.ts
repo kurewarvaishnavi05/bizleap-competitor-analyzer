@@ -60,15 +60,13 @@ Ensure that 'comparisonData.features' and 'comparisonData.pricing' use the actua
 
     if (input.useWebSearch) {
       config.tools = [{ googleSearch: {} }];
-      // Note: Cannot use responseMimeType="application/json" when tools are enabled
     } else {
-      // Fast mode without search allows strict JSON enforcement
       config.responseMimeType = "application/json";
     }
 
     // Try generating content stream
     const stream = await ai.models.generateContentStream({
-      model: 'gemini-1.5-pro',
+      model: 'gemini-2.5-flash',
       contents: prompt,
       config
     });
