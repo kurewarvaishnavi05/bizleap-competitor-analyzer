@@ -16,6 +16,7 @@ export default function AnalysisPage() {
   const [companyWebsite, setCompanyWebsite] = useState("");
   const [industry, setIndustry] = useState("");
   const [targetMarket, setTargetMarket] = useState("");
+  const [useWebSearch, setUseWebSearch] = useState(false);
   const [competitors, setCompetitors] = useState<{id: number, value: string}[]>([{ id: Date.now(), value: "" }]);
 
   useEffect(() => {
@@ -57,7 +58,8 @@ export default function AnalysisPage() {
       companyWebsite,
       industry,
       targetMarket,
-      competitors: validCompetitors
+      competitors: validCompetitors,
+      useWebSearch
     });
   };
 
@@ -168,6 +170,36 @@ export default function AnalysisPage() {
                 <Plus className="mr-2 h-4 w-4" /> Add Competitor
               </Button>
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Analysis Settings</CardTitle>
+            <CardDescription>Configure how the AI performs the analysis</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-2 p-4 border rounded-lg bg-card/50">
+              <input
+                type="checkbox"
+                id="websearch"
+                checked={useWebSearch}
+                onChange={(e) => setUseWebSearch(e.target.checked)}
+                className="w-5 h-5 accent-primary cursor-pointer"
+              />
+              <div className="space-y-1 leading-none ml-2">
+                <label
+                  htmlFor="websearch"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Enable Live Web Search (Google Grounding)
+                </label>
+                <p className="text-sm text-muted-foreground mt-1">
+                  When enabled, the AI fetches real-time data from the internet. 
+                  <span className="text-amber-500 ml-1">Warning: Slower and may cause 503 timeouts on free tier.</span>
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 

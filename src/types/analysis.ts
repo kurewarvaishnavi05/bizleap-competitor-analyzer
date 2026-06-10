@@ -4,6 +4,7 @@ export interface AnalysisInput {
   industry: string;
   targetMarket: string;
   competitors: string[];
+  useWebSearch?: boolean;
 }
 
 export interface Recommendation {

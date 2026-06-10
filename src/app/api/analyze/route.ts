@@ -53,14 +53,24 @@ Ensure that EVERY FIELD in the schema is provided, especially 'battleCards', 'sw
 Ensure that 'comparisonData.features' and 'comparisonData.pricing' use the actual names of the competitors as keys (e.g., "${input.competitors[0] || 'competitor1'}": true).
 `;
 
+    // Configure based on the toggle
+    const config: any = {
+      temperature: 0.2,
+    };
+
+    if (input.useWebSearch) {
+      config.tools = [{ googleSearch: {} }];
+      // Note: Cannot use responseMimeType="application/json" when tools are enabled
+    } else {
+      // Fast mode without search allows strict JSON enforcement
+      config.responseMimeType = "application/json";
+    }
+
     // Try generating content stream
     const stream = await ai.models.generateContentStream({
       model: 'gemini-2.5-flash',
       contents: prompt,
-      config: {
-        temperature: 0.2,
-        tools: [{ googleSearch: {} }]
-      }
+      config
     });
 
     const readable = new ReadableStream({
