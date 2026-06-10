@@ -67,23 +67,38 @@ export const useAppStore = create<AppState>((set) => ({
         // Strip markdown JSON blocks if the AI includes them
         let cleanText = fullText.replace(/```json/gi, '').replace(/```/g, '').trim();
         
-        // Extract just the JSON object from the first { to the last }
-        const firstBrace = cleanText.indexOf('{');
-        const lastBrace = cleanText.lastIndexOf('}');
-        
-        if (firstBrace !== -1 && lastBrace !== -1) {
-          cleanText = cleanText.substring(firstBrace, lastBrace + 1);
-        }
-        
-        // Fix common AI JSON hallucinations
-        cleanText = cleanText.replace(/\"\s*\.\s*\]/g, '"]'); // Fixes ["item".] -> ["item"]
-        cleanText = cleanText.replace(/,\s*\]/g, ']'); // Fixes trailing commas in arrays
-        cleanText = cleanText.replace(/,\s*\}/g, '}'); // Fixes trailing commas in objects
-        
         let results;
-        try {
-          results = JSON.parse(cleanText);
-        } catch (e) {
+        let parsed = false;
+
+        // Try to parse. If it fails, strip everything after the last '}' and try again.
+        // Keep doing this to bypass citations that have '{' '}' in them.
+        while (cleanText.length > 10) {
+          try {
+            const firstBrace = cleanText.indexOf('{');
+            const lastBrace = cleanText.lastIndexOf('}');
+            
+            if (firstBrace === -1 || lastBrace === -1) break;
+            
+            let attempt = cleanText.substring(firstBrace, lastBrace + 1);
+            
+            // Fix common AI JSON hallucinations
+            attempt = attempt.replace(/\"\s*\.\s*\]/g, '"]');
+            attempt = attempt.replace(/,\s*\]/g, ']');
+            attempt = attempt.replace(/,\s*\}/g, '}');
+            
+            results = JSON.parse(attempt);
+            parsed = true;
+            break; // Success!
+          } catch (e) {
+            // Parsing failed. The lastBrace might be a stray brace from a citation.
+            // Remove the last brace and any trailing text, then try again.
+            const lastBrace = cleanText.lastIndexOf('}');
+            if (lastBrace <= 0) break;
+            cleanText = cleanText.substring(0, lastBrace - 1);
+          }
+        }
+
+        if (!parsed) {
           if (fullText.includes('503') || fullText.includes('high demand')) {
             throw new Error('Google servers are currently overloaded (503).');
           }
