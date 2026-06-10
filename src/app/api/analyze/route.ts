@@ -68,7 +68,7 @@ Ensure that 'comparisonData.features' and 'comparisonData.pricing' use the actua
 
     // Try generating content stream
     const stream = await ai.models.generateContentStream({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: prompt,
       config
     });
