@@ -75,6 +75,11 @@ export const useAppStore = create<AppState>((set) => ({
           cleanText = cleanText.substring(firstBrace, lastBrace + 1);
         }
         
+        // Fix common AI JSON hallucinations
+        cleanText = cleanText.replace(/\"\s*\.\s*\]/g, '"]'); // Fixes ["item".] -> ["item"]
+        cleanText = cleanText.replace(/,\s*\]/g, ']'); // Fixes trailing commas in arrays
+        cleanText = cleanText.replace(/,\s*\}/g, '}'); // Fixes trailing commas in objects
+        
         let results;
         try {
           results = JSON.parse(cleanText);
